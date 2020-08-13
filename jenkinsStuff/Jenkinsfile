@@ -1,0 +1,32 @@
+String credentials = 'awsCredentials'
+pipeline{
+    agent any
+
+    parameters{
+        booleanParam(name: 'autoApprove', defaultValue: true, description: 'Automatically run apply after generating plan?')
+    }
+
+    stages{
+        stage('Plan'){
+            steps{
+                script{
+                    currentBuild.displayName = params.version
+                }
+                sh 'terraform init'
+                sh "terraform plan"
+            }
+        }
+        stage('Approval'){
+            when{
+                not{
+                    equals expected: true, actual: params.autoApprove
+                }
+            }
+        }
+        stage('Apply'){
+            steps{
+                sh "terraform apply -targey=module.vpc_1 -auto-approve"
+            }
+        }
+    }
+}

@@ -1,0 +1,43 @@
+String credentials = 'awsCredentials'
+pipeline{
+    agent any
+
+    parameters{
+        booleanParam(name: 'autoApprove', defaultValue: true, description: 'Automatically run apply after generating plan?')
+    }
+
+    stages{
+        // stage('Plan'){
+        //     steps{
+        //         script{
+        //             currentBuild.displayName = params.version
+        //         }
+        //         sh 'terraform init'
+        //         sh "terraform plan -target=module.vpc_1"
+        //     }
+        // }
+        stage('ChangeDirectory'){
+            steps{
+                dir("vpc-implementation") {
+                    sh "pwd"
+                    sh 'ls'
+                }
+            }
+        }
+        // stage('Approval'){
+        //     when{
+        //         not{
+        //             equals expected: true, actual: params.autoApprove
+        //         }
+        //     }
+        // }
+        stage('Apply'){
+            steps{
+                dir("vpc-implementation"){
+                    sh 'terraform init'
+                    sh "terraform apply -target=module.vpc_1 -auto-approve"
+                }
+            }
+        }
+    }
+}
